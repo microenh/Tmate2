@@ -27,12 +27,10 @@ def main_string(text, rotate):
         pos = (i+rotate)
         display_dict['main_%dl' % (9-i)], display_dict['main_%dr' % (9-i)] = (0,0) if pos >= len(text) else digit_main_layout[ord(text[pos]) - 32]
 
-
 def smeter_string(text, rotate):
     for i in range(0,3):
         pos = (i+rotate)
         display_dict['smeter_%dl' % (3-i)], display_dict['smeter_%dr' % (3-i)] = (0,0) if pos >= len(text) else digit_smeter_layout[ord(text[pos]) - 32]
-
 
 def smeter_number(value):
     display_dict['smeter_db_minus'] = value < 0
@@ -42,11 +40,9 @@ def smeter_number(value):
         value = value // 10
         display_dict['smeter_%dl' % i], display_dict['smeter_%dr' % i] = (0,0) if number == 0 and value == 0  and i > 1 else digit_smeter_layout[number+16]
 
-
 def smeter_bars(value):
     for i in range(1,16):
         display_dict['smeter_bar%d' %i] = value >= i
-
 
 def update_display_dict():
     bitstruct.pack_into_dict(write_format, write_names, display_data, 0, display_dict)
@@ -58,10 +54,17 @@ def byte_swap16(value):
     return ((value & 0xff) << 8) | (value >> 8)
 
 def encoder_delta(which, old, current):
-    old_value = old[which]
-    current_value = current[which]
-    return 0 if current_value == old_value else int(byte_swap16(old_value)) - int(byte_swap16(current_value))
-
+    old_value = byte_swap16(old[which])
+    current_value = byte_swap16(current[which])
+    if current_value == old_value:
+        return 0
+    else:
+        old[which] = current[which]
+        if (current_value >= old_value):
+            delta = current_value - old_value
+        else:
+            delta = -(old_value - current_value)
+        return delta
 
 def test():
     # display_dict['pre'] = True
@@ -93,7 +96,7 @@ def test():
     # display_dict['e1'] = True
     # display_dict['e2'] = True
     # display_dict['k'] = True
-    # display_dict['hz'] = True
+    display_dict['hz'] = True
     # display_dict['vfo'] = True
     # display_dict['a'] = True
     # display_dict['lsb'] = True
@@ -101,23 +104,19 @@ def test():
     # display_dict['mw_w'] = True
     # display_dict['mw_m'] = True
 
-    # for k in range(1,4):
-    #     display_dict['smeter_%dl' % k] = 0b111
-    #     display_dict['smeter_%dr' % k] = 0b1111
-
     main_value = 0
-    # main_number(main_value)
-    rotate = 0
+    main_number(main_value)
+    # rotate = 0
     crawl = "0123456789 ABCDEFGHIJKLMNOPQRSTUVWXYZ " * 2
-    main_string(crawl, rotate)
-    smeter_string(crawl, rotate)
+    # main_string(crawl, rotate)
+    # smeter_string(crawl, rotate)
 
-    smeter_number(-0)
-    smeter_bars(4)
+    # smeter_number(-0)
+    # smeter_bars(4)
 
     display_dict['enc_speed1'] = 1
-    display_dict['enc_speed2'] = 1
-    display_dict['enc_speed3'] = 1
+    display_dict['enc_speed2'] = 10
+    display_dict['enc_speed3'] = 100
 
     display_dict['rgb_red'] = 0xf
     display_dict['rgb_green'] = 0xf
@@ -134,15 +133,16 @@ def test():
     while 1:
         d = read_state()
         if d != old_d:
-            # print (d)
             delta = encoder_delta('main', old_d, d)
             if delta:
-                main_value += delta
+                main_value -= delta
                 if main_value < 0:
                     main_value = 0
                 if main_value > 30_000_000:
                     main_value = 30_000_000
                 main_number(main_value)
+                display_dict['dot2'] = main_value > 1_000
+                display_dict['dot1'] = main_value > 1_000_000
                 update_display_dict()
 
             # if (d[1] != old_d[1]):
@@ -164,19 +164,19 @@ def test():
             # if quit:
             #     break
 
-            old_d = d
+            # old_d = d
 
         ctr -= 1
         if ctr == 0:
             ctr = STEPS
-            rotate += 1
-            main_string(crawl, rotate)
-            smeter_string(crawl, rotate)
-            update_display_dict()
+            # rotate += 1
+            # main_string(crawl, rotate)
+            # smeter_string(crawl, rotate)
+            # update_display_dict()
             i.write(bytes(display_data))
+        if not d['main_b']:
+            break
         sleep(0.001)
-
-
 
 
 if __name__ == '__main__':
