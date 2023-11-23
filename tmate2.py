@@ -5,6 +5,9 @@ import hid
 from bitstruct import *
 from time import sleep
 
+
+read_fmt = 'p8' + 's16' * 3 + 'b1' * 8 + 'p7' + 'b1'
+
 format = ('p8'
             + 'b1' * 7 + 'p1'                   # 1
             + 'b1' * 8                          # 2
@@ -205,13 +208,13 @@ def test():
 
     b = bytes(data)
 
-    read_fmt = '>' + 's16' * 4
-    old_d = list(unpack(read_fmt, i1.read(9), 8))
+    old_d = list(unpack(read_fmt, i1.read(9)))
 
     STEPS = 100
     ctr = STEPS
     while 1:        
         d = unpack(read_fmt, i1.read(9))
+        # print (d)
         if (d[0] != old_d[0]):
             main_value += (old_d[0] - d[0])
             old_d[0] = d[0]
@@ -229,7 +232,15 @@ def test():
         if (d[2] != old_d[2]):
             print ("e2 enc: %d" % (d[2] - old_d[2]))
             old_d[2] = d[2]
-        if (d[3] != old_d[3]):
+        quit = False
+        for f in range(3,12):
+            if d[f] != old_d[f]:
+                print ('%d: %r' % (f, d[f]))
+                old_d[f] = d[f]
+                if f == 4:
+                    quit = True
+                    break
+        if quit:
             break
         ctr -= 1
         if ctr == 0:
