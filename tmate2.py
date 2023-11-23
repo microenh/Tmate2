@@ -12,8 +12,10 @@ format = ('p8'
             + 'b1' * 7 + 'p1'                   # 1
             + 'b1' * 8                          # 2
             + 'b1' * 8                          # 3
-            + 'p3' + 'b1' * 5                   # 4
-            + 'p3' + 'b1' * 5                   # 5
+            # + 'p3' + 'b1' * 5                   # 4
+            + 'p3' + 'b1' + 'u4'                   # 4
+            # + 'p3' + 'b1' * 5                   # 5
+            + 'p3' + 'b1' * 2  + 'u3'                  # 5
             + 'p3' + 'b1' * 5                   # 6
             + 'p3' + 'b1' * 5                   # 8
             + 'p3' + 'b1' * 5                   # 9
@@ -47,8 +49,10 @@ format = ('p8'
 names = ['e1', 'nr', 'vfo', 's', 'tx', 'rx', 'lp',                                                  # 1
             'vol', 'nb', 'a', 'smeter_1', 'smeter_bar3', 'smeter_bar2', 'smeter_bar1', 'att',       # 2
             'rfg', 'an', 'b', 'smeter_3', 'smeter_5', 'smeter_7', 's_meter_9', 'smeter_line',       # 3
-            'sql', 'main_9d', 'main_9e', 'main_9g', 'main_9f',                                      # 4
-            'drv', 'underline_9', 'main_9c', 'main_9b', 'main_9a',                                  # 5
+#            'sql', 'main_9d', 'main_9e', 'main_9g', 'main_9f',                                      # 4
+            'sql', 'main_9l',                                      # 4
+#            'drv', 'underline_9', 'main_9c', 'main_9b', 'main_9a',                                  # 5
+            'drv', 'underline_9', 'main_9r',                                  # 5
             'nr2', 'main_8d', 'main_8e', 'main_8g', 'main_8f',                                      # 6
             'nb2', 'underline_8', 'main_8c', 'main_8b', 'main_8a',                                  # 7
             'an2', 'main_7d', 'main_7e', 'main_7g', 'main_7f',                                      # 8
@@ -93,6 +97,19 @@ digit7_layout = {
     7: 'abc',
     8: 'abcdefg',
     9: 'gfabcd'
+}
+
+digit_main_layout = {
+    0: (0b1101, 0b111),
+    1: (0b0000, 0b110),
+    2: (0b1110, 0b011),
+    3: (0b1010, 0b111),
+    4: (0b0011, 0b110),
+    5: (0b1011, 0b101),
+    6: (0b1111, 0b101),
+    7: (0b0000, 0b111),
+    8: (0b1111, 0b111),
+    9: (0b1011, 0b111),
 }
 
 
@@ -182,6 +199,9 @@ def test():
     rd['a'] = True
     rd['lsb'] = True
     rd['dbm'] = True
+    l,r = digit_main_layout[9]
+    rd['main_9l'] = l
+    rd['main_9r'] = r
  
     # for j in range(1,10):
     #     digit_main(j,j,rd)
@@ -222,7 +242,7 @@ def test():
                 main_value = 0
             if main_value > 30_000_000:
                 main_value = 30_000_000
-            main_number(main_value, rd)
+            # main_number(main_value, rd)
             pack_into_dict(format, names, data, 0, rd)
             b = bytes(data)
 
