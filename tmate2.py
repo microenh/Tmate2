@@ -22,13 +22,25 @@ def main_number(value):
         value = value // 10
         display_dict['main_%dl' % i], display_dict['main_%dr' % i] = (0,0) if number == 0 and value == 0  and i > 1 else digit_main_layout[number+16]
 
+def main_string(text, rotate):
+    for i in range(0,9):
+        pos = (i+rotate)
+        display_dict['main_%dl' % (9-i)], display_dict['main_%dr' % (9-i)] = (0,0) if pos >= len(text) else digit_main_layout[ord(text[pos]) - 32]
+
+
+def smeter_string(text, rotate):
+    for i in range(0,3):
+        pos = (i+rotate)
+        display_dict['smeter_%dl' % (3-i)], display_dict['smeter_%dr' % (3-i)] = (0,0) if pos >= len(text) else digit_smeter_layout[ord(text[pos]) - 32]
+
+
 def smeter_number(value):
     display_dict['smeter_db_minus'] = value < 0
     value = abs(value)
     for i in range(1,4):
         number = value % 10
         value = value // 10
-        display_dict['smeter_%dl' % i], display_dict['smeter_%dr' % i] = (0,0) if number == 0 and value == 0  and i > 1 else digit_smeter_layout[value+16]
+        display_dict['smeter_%dl' % i], display_dict['smeter_%dr' % i] = (0,0) if number == 0 and value == 0  and i > 1 else digit_smeter_layout[number+16]
 
 
 def smeter_bars(value):
@@ -86,14 +98,22 @@ def test():
     # display_dict['a'] = True
     # display_dict['lsb'] = True
     # display_dict['dbm'] = True
-    display_dict['mw_w'] = True
-    display_dict['mw_m'] = True
+    # display_dict['mw_w'] = True
+    # display_dict['mw_m'] = True
+
+    # for k in range(1,4):
+    #     display_dict['smeter_%dl' % k] = 0b111
+    #     display_dict['smeter_%dr' % k] = 0b1111
 
     main_value = 0
-    main_number(main_value)
+    # main_number(main_value)
+    rotate = 0
+    crawl = "0123456789 ABCDEFGHIJKLMNOPQRSTUVWXYZ " * 2
+    main_string(crawl, rotate)
+    smeter_string(crawl, rotate)
 
-    smeter_number(-111)
-    smeter_bars(10)
+    smeter_number(-0)
+    smeter_bars(4)
 
     display_dict['enc_speed1'] = 1
     display_dict['enc_speed2'] = 1
@@ -149,6 +169,10 @@ def test():
         ctr -= 1
         if ctr == 0:
             ctr = STEPS
+            rotate += 1
+            main_string(crawl, rotate)
+            smeter_string(crawl, rotate)
+            update_display_dict()
             i.write(bytes(display_data))
         sleep(0.001)
 
