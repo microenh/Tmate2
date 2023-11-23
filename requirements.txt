@@ -1,0 +1,5 @@
+bitstruct==8.19.0
+hid==1.0.5
+hidapi==0.14.0
+setuptools==68.0.0
+wheel==0.41.2
