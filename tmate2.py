@@ -11,7 +11,7 @@ from names import read_names, write_names
 from layout import digit_main_layout, digit_smeter_layout
 
 i = hid.Device(0x1721, 0x0614)
-i1 = hid.Device(0x1721, 0x0614)
+# i1 = hid.Device(0x1721, 0x0614)
 
 display_data = bytearray(b'\x00' * 45)
 display_dict = dict(zip(write_names, (0,) * (len(write_names))))
@@ -48,7 +48,7 @@ def update_display_dict():
     bitstruct.pack_into_dict(write_format, write_names, display_data, 0, display_dict)
 
 def read_state():
-    return bitstruct.unpack_dict(read_format, read_names, i1.read(9))
+    return bitstruct.unpack_dict(read_format, read_names, i.read(9))
 
 def byte_swap16(value):
     return ((value & 0xff) << 8) | (value >> 8)
@@ -175,6 +175,7 @@ def test():
             # update_display_dict()
             i.write(bytes(display_data))
         if not d['main_b']:
+            print("Done.")
             break
         sleep(0.001)
 
